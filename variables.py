@@ -8,7 +8,12 @@ types = [
     ]
 #     'LABEL'
 # ]
-
+delimiters = [
+    'LBRACKET',
+    'RBRACKET',
+    'COMMA',
+    # 'SEMI'
+]
 
 instructions_tokens = {
     'ADD': 'ADD',
@@ -19,8 +24,8 @@ instructions_tokens = {
     'LSL': 'LSL',
     'LSR': 'LSR',
     'MOD': 'MOD',
-    # 'LDR': 'LDR',
-    # 'STR': 'STR',
+    'LDR': 'LDR',
+    'STR': 'STR',
     'MOV': 'MOV',
     'CMP': 'CMP'
     # 'B': 'B',
@@ -29,7 +34,7 @@ instructions_tokens = {
 
 
 def get_tokens():
-    return types + list(instructions_tokens.values())
+    return types + list(instructions_tokens.values()) + delimiters
     # return types + list(instructions.values()) + list(registers.values())
 
 
@@ -37,7 +42,8 @@ def get_tokens():
 # ----------Regular expressions---------
 # --------------------------------------
 
-t_ignore = r'[ ,]'
+t_ignore = r' '
+
 
 # -------------Instructions-------------
 # Format:  [ op , func , SFlag ]
@@ -52,6 +58,12 @@ instructions_data = {
     'MOD': ['00', '111', '0'],
     'MOV': ['00', '000', '0'],
     'CMP': ['00', '001', '1']
+}
+
+# Format:   op
+instructions_mem = {
+    'LDR': '10',
+    'STR': '11'
 }
 
 # --------------Registers--------------
