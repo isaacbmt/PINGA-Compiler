@@ -12,7 +12,7 @@ delimiters = [
     'LBRACKET',
     'RBRACKET',
     'COMMA',
-    # 'SEMI'
+    'SEMI'
 ]
 
 instructions_tokens = {

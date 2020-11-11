@@ -43,9 +43,9 @@ def t_INT(t):
     return t
 
 
-# def t_EOL(t):
-#     r';'
-#     t.lexer.lineno += 1
+def t_EOL(t):
+    r';'
+    t.lexer.lineno += 1
 
 
 def t_COMMENT(t):
@@ -170,13 +170,14 @@ labels = {}
 # lexer.input('ADD r2 r31 4')
 #
 #
-while True:
-    try:
-        s = input('>> ')
-    except EOFError:
-        break
-    result = parser.parse(s)
-    print(result)
+# while True:
+#     try:
+#         s = input('>> ')
+#     except EOFError:
+#         break
+s = readFile('test.S')
+result = parser.parse(s)
+print(result)
 
 #
 # while True:
