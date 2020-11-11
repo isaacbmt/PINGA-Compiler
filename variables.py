@@ -4,10 +4,10 @@
 
 types = [
     'INT',
-    'REGISTER'
-    ]
-#     'LABEL'
-# ]
+    'REGISTER',
+    'LABEL'
+]
+
 delimiters = [
     'LBRACKET',
     'RBRACKET',
@@ -27,9 +27,10 @@ instructions_tokens = {
     'LDR': 'LDR',
     'STR': 'STR',
     'MOV': 'MOV',
-    'CMP': 'CMP'
-    # 'B': 'B',
-    # 'BEQ': 'BEQ'
+    'CMP': 'CMP',
+    'B'  : 'B',
+    'BEQ': 'BEQ',
+    'NAME': 'NAME'
 }
 
 
@@ -42,7 +43,7 @@ def get_tokens():
 # ----------Regular expressions---------
 # --------------------------------------
 
-t_ignore = r' '
+t_ignore = " "
 
 
 # -------------Instructions-------------
@@ -65,6 +66,19 @@ instructions_mem = {
     'LDR': '10',
     'STR': '11'
 }
+
+# Format:  [ op  cond ]
+instructions_branch = {
+    'B'  : ['01', '0'],
+    'BEQ': ['01', '1']
+}
+
+
+# --------------Labels--------------
+labels = {
+
+}
+
 
 # --------------Registers--------------
 registers_data = {

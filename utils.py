@@ -29,6 +29,10 @@ def buildImmMemInstr(op, rd, ra1, imm):
     return op + '1' + rd + ra1 + imm + '0000'
 
 
+def buildBranchInstr(op, cond, address):
+    return op + cond + '0000000000' + address + '0000'
+
+
 def readFile(filename):
     with open(filename, "r") as file:
         return file.read()
