@@ -5,9 +5,9 @@ def toBin(num, length):
     return num
 
 
-# print('registers = {')
-#
-# for i in range(32):
-#     string = '\'R{}\': \'R{}\''.format(i, i) + ','
-#     print(string)
-# print('}')
+def buildRegDataInstr(op, rd, ra1, ra2, sflag, func):
+    return op + '0' + rd + ra1 + ra2 + '0000000000' + sflag + func
+
+
+def buildImmDataInstr(op, rd, ra1, imm, sflag, func):
+    return op + '1' + rd + ra1 + imm + sflag + func
