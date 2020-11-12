@@ -5,7 +5,8 @@
 types = [
     'INT',
     'REGISTER',
-    'LABEL'
+    'LABEL',
+    'COMMENT'
 ]
 
 delimiters = [

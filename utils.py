@@ -1,7 +1,12 @@
-def toBin(num, length):
+def decToBin(num, length):
     num = format(num, 'b')
     while len(num) < length:
         num = '0' + num
+    return num
+
+
+def hexToDec(num):
+    num = int(num, 16)
     return num
 
 

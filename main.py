@@ -18,7 +18,14 @@ def t_LABEL(t):
     t.type = 'LABEL'
     label = labels.get(t.value, '')
     if label == '':
-        labels[t.value] = toBin(t.lexer.lineno - len(labels), 15)
+        labels[t.value] = decToBin(t.lexer.lineno - len(labels), 15)
+    return t
+
+
+def t_HEX(t):
+    r'0x[0-9a-fA-F]*'
+    t.type = 'INT'
+    t.value = hexToDec(t.value)
     return t
 
 
@@ -58,9 +65,14 @@ def t_NEWLINE(t):
 
 
 def t_COMMENT(t):
-    r'//.*\n'
-    # t.lexer.lineno += 1
-    return t
+    r'(//.*?\n)'
+    t.lexer.lineno += 1
+
+
+# def t_COMMENT(t):
+#     r'//.*\n'
+#     t.lexer.lineno += 1
+#     # return t
 
 
 def t_error(t):
@@ -102,9 +114,9 @@ def p_expression_memory(p):
     op = instructions_mem.get(p[1])
     rd, ra1 = registers_data.get(p[2]), registers_data.get(p[5])
     if p[6] == ']':
-        p[0] = buildImmMemInstr(op, rd, ra1, toBin(0, 15))
+        p[0] = buildImmMemInstr(op, rd, ra1, decToBin(0, 15))
     elif isinstance(p[7], int):
-        p[0] = buildImmMemInstr(op, rd, ra1, toBin(p[7], 15))
+        p[0] = buildImmMemInstr(op, rd, ra1, decToBin(p[7], 15))
     else:
         ra2 = registers_data.get(p[7])
         p[0] = buildRegMemInstr(op, rd, ra1, ra2)
@@ -127,7 +139,7 @@ def p_expression_mov(p):
     op, func, sflag = instructions_data.get(p[1].upper())
     rd, ra1 = registers_data.get(p[2]), registers_data.get(p[4])
     if isinstance(p[4], int):
-        p[0] = buildImmDataInstr(op, rd, '00000', toBin(p[4], 15), sflag, func)
+        p[0] = buildImmDataInstr(op, rd, '00000', decToBin(p[4], 15), sflag, func)
     else:
         p[0] = buildRegDataInstr(op, rd, '00000', ra1, sflag, func)
 
@@ -140,7 +152,7 @@ def p_expression_cmp(p):
     op, func, sflag = instructions_data.get(p[1].upper())
     rd, ra1 = registers_data.get(p[2]), registers_data.get(p[4])
     if isinstance(p[3], int):
-        p[0] = buildImmDataInstr(op, rd, rd, toBin(p[4], 15), sflag, func)
+        p[0] = buildImmDataInstr(op, rd, rd, decToBin(p[4], 15), sflag, func)
     else:
         p[0] = buildRegDataInstr(op, rd, rd, ra1, sflag, func)
 
@@ -153,7 +165,7 @@ def p_expression_arithmetic(p):
     op, func, sflag = instructions_data.get(p[1])
     rd, ra1 = registers_data.get(p[2]), registers_data.get(p[4])
     if isinstance(p[6], int):
-        p[0] = buildImmDataInstr(op, rd, ra1, toBin(p[6], 15), sflag, func)
+        p[0] = buildImmDataInstr(op, rd, ra1, decToBin(p[6], 15), sflag, func)
     else:
         ra2 = registers_data.get(p[6])
         p[0] = buildRegDataInstr(op, rd, ra1, ra2, sflag, func)
@@ -225,7 +237,7 @@ def p_error(p):
         print("Line {0}: Syntax error".format(lexer.lineno))
 
 
-s = readFile('test.S')
+s = readFile('test.S').rstrip('\n').rstrip(' ')
 lexer.input(s)
 while True:
     tok = lexer.token()
@@ -233,6 +245,7 @@ while True:
         break
     # print(tok)
 
+# lexer = lex.lex()
 parser = yacc.yacc()
 result = parser.parse(s)
 print(result)
