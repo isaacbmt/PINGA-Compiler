@@ -16,7 +16,9 @@ t_COMMA = r','
 def t_LABEL(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*:'
     t.type = 'LABEL'
-    labels[t.value] = toBin(t.lexer.lineno, 15)
+    label = labels.get(t.value, '')
+    if label == '':
+        labels[t.value] = toBin(t.lexer.lineno - len(labels), 15)
     return t
 
 
@@ -113,9 +115,7 @@ def p_expression_branch(p):
     instr       : branchInstr name
     '''
     op, cond = instructions_branch.get(p[1])
-    print('p2: ', p[2])
     address = labels.get(p[2])
-    # address = p[2]
     p[0] = buildBranchInstr(op, cond, address)
 
 
@@ -231,18 +231,17 @@ while True:
     tok = lexer.token()
     if not tok:
         break
-#     print(tok)
-
+    # print(tok)
 
 parser = yacc.yacc()
-result = parser.parse(s, lexer=lexer)
+result = parser.parse(s)
 print(result)
 print(labels)
 
 with open('instrucciones.txt', 'w') as f:
     for item in result:
         if item != 'label':
-            f.write("%s\n" % item)
+            f.write("%s\n" % toHex(item))
 
 
 # while True:
