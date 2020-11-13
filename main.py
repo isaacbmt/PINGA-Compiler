@@ -39,12 +39,18 @@ def t_REGISTER(t):
 
 def t_NEWLINE(t):
     r'\n'
-    t.lexer.lineno += 1
+    if t.lexer.lineno <= 0:
+        t.lexer.lineno -= 1
+    else:
+        t.lexer.lineno += 1
 
 
 def t_COMMENT(t):
     r'(//.*?\n)'
-    t.lexer.lineno += 1
+    if t.lexer.lineno <= 0:
+        t.lexer.lineno -= 1
+    else:
+        t.lexer.lineno += 1
 
 
 def t_INSTRUCTION(t):
@@ -53,6 +59,12 @@ def t_INSTRUCTION(t):
 
     if t.type == 'default':
         # print(f'{Fore.LIGHTRED_EX}La instruccion {t.type} no existe.{Style.RESET_ALL}')
+        name = names.get(t.value, '')
+        if t.lexer.lineno > 0:
+            if name == '':
+                names[t.value] = [decToBin(t.lexer.lineno + 1 - len(labels), 15)]
+            else:
+                names[t.value] = names.get(t.value) + [decToBin(t.lexer.lineno + 1 - len(labels), 15)]
         t.type = 'NAME'
     return t
 
@@ -121,11 +133,16 @@ def p_expression_branch(p):
     instr       : branchInstr name
     '''
     op, cond = instructions_branch.get(p[1])
-    address = labels.get(p[2], '')
-    if address == '':
+    startAddress = names.get(p[2][:-1], '')
+    endAddress = labels.get(p[2], '')
+    if endAddress == '' or startAddress == '':
         print(f'{Fore.LIGHTRED_EX}La dirección {Fore.RED}{p[2][:-1]}{Fore.LIGHTRED_EX} no existe.{Style.RESET_ALL}')
         parser.errok()
     else:
+        namelist = names.get(p[2][:-1])
+        names[p[2][:-1]] = namelist[1:] + [namelist[0]]
+        address = int(endAddress, 2) - int(startAddress[0], 2)
+        address = decToBin(address, 15) if address > 0 else twoComplement(str(address)[1:])
         p[0] = buildBranchInstr(op, cond, address)
 
 
@@ -150,9 +167,9 @@ def p_expression_cmp(p):
     op, func, sflag = instructions_data.get(p[1].upper())
     rd, ra1 = registers_data.get(p[2]), registers_data.get(p[4])
     if isinstance(p[4], int):
-        p[0] = buildImmDataInstr(op, rd, rd, decToBin(p[4], 15), sflag, func)
+        p[0] = buildImmDataInstr(op, '00000', rd, decToBin(p[4], 15), sflag, func)
     else:
-        p[0] = buildRegDataInstr(op, rd, rd, ra1, sflag, func)
+        p[0] = buildRegDataInstr(op, '00000', rd, ra1, sflag, func)
 
 
 def p_expression_arithmetic(p):
@@ -242,11 +259,21 @@ while True:
         break
     # print(tok)
 
-# lexer = lex.lex()
+tmp = names
+# tmp = {}
+# for item in names:
+#     tmp[item] = names[item][:len(names[item])/2]
+lexer.lineno = 0
+print('tmp', tmp)
+
+# lexer = lexer.clone()
+# names = tmp
+print('namtmp', names)
 parser = yacc.yacc()
-result = parser.parse(s)
+result = parser.parse(s, lexer=lexer)
 print(result)
 print(labels)
+print('names', names)
 
 with open('instrucciones.txt', 'w') as f:
     for item in result:

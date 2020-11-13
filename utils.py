@@ -18,6 +18,11 @@ def toHex(str):
     return num
 
 
+def twoComplement(num):
+    aux = 32767
+    return format((aux - int(num)) + 1, 'b')
+
+
 def buildRegDataInstr(op, rd, ra1, ra2, sflag, func):
     return op + '0' + rd + ra1 + ra2 + '0000000000' + sflag + func
 

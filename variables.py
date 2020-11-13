@@ -80,6 +80,10 @@ labels = {
 
 }
 
+names = {
+
+}
+
 # --------------Registers--------------
 registers_data = {
      'R0': '00000',
