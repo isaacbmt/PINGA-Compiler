@@ -37,6 +37,16 @@ def t_REGISTER(t):
     return t
 
 
+def t_NEWLINE(t):
+    r'\n'
+    t.lexer.lineno += 1
+
+
+def t_COMMENT(t):
+    r'(//.*?\n)'
+    t.lexer.lineno += 1
+
+
 def t_INSTRUCTION(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
     t.type = instructions_tokens.get(t.value.upper(), 'default')  # Check for reserved words
@@ -57,22 +67,6 @@ def t_SEMI(t):
     r';'
     t.type = 'SEMI'
     return t
-
-
-def t_NEWLINE(t):
-    r'\n'
-    t.lexer.lineno += 1
-
-
-def t_COMMENT(t):
-    r'(//.*?\n)'
-    t.lexer.lineno += 1
-
-
-# def t_COMMENT(t):
-#     r'//.*\n'
-#     t.lexer.lineno += 1
-#     # return t
 
 
 def t_error(t):
@@ -127,8 +121,12 @@ def p_expression_branch(p):
     instr       : branchInstr name
     '''
     op, cond = instructions_branch.get(p[1])
-    address = labels.get(p[2])
-    p[0] = buildBranchInstr(op, cond, address)
+    address = labels.get(p[2], '')
+    if address == '':
+        print(f'{Fore.LIGHTRED_EX}La dirección {Fore.RED}{p[2][:-1]}{Fore.LIGHTRED_EX} no existe.{Style.RESET_ALL}')
+        parser.errok()
+    else:
+        p[0] = buildBranchInstr(op, cond, address)
 
 
 def p_expression_mov(p):
@@ -151,7 +149,7 @@ def p_expression_cmp(p):
     '''
     op, func, sflag = instructions_data.get(p[1].upper())
     rd, ra1 = registers_data.get(p[2]), registers_data.get(p[4])
-    if isinstance(p[3], int):
+    if isinstance(p[4], int):
         p[0] = buildImmDataInstr(op, rd, rd, decToBin(p[4], 15), sflag, func)
     else:
         p[0] = buildRegDataInstr(op, rd, rd, ra1, sflag, func)
@@ -230,14 +228,13 @@ def p_branch(p):
 
 
 def p_error(p):
-    # print("Syntax error in input! -> {}".format(p))
     try:
         print("Line {1}: Syntax error on '{0}'".format(p.value, lexer.lineno))
     except AttributeError:
         print("Line {0}: Syntax error".format(lexer.lineno))
 
 
-s = readFile('test.S').rstrip('\n').rstrip(' ')
+s = readFile('test.asm').rstrip('\n').rstrip(' ')
 lexer.input(s)
 while True:
     tok = lexer.token()
@@ -254,7 +251,8 @@ print(labels)
 with open('instrucciones.txt', 'w') as f:
     for item in result:
         if item != 'label':
-            f.write("%s\n" % toHex(item))
+            if item is not None:
+                f.write("%s\n" % toHex(item))
 
 
 # while True:
