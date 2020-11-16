@@ -5,8 +5,7 @@
 types = [
     'INT',
     'REGISTER',
-    'LABEL',
-    'COMMENT'
+    'LABEL'
 ]
 
 delimiters = [
@@ -22,8 +21,8 @@ instructions_tokens = {
     'DIV': 'DIV',
     'MUL': 'MUL',
     'LST': 'LST',   #Less than
-    'LSL': 'LSL',
-    'LSR': 'LSR',
+    'SLL': 'SLL',
+    'SRL': 'SRL',
     'MOD': 'MOD',
     'LDR': 'LDR',
     'STR': 'STR',
@@ -37,14 +36,13 @@ instructions_tokens = {
 
 def get_tokens():
     return types + list(instructions_tokens.values()) + delimiters
-    # return types + list(instructions.values()) + list(registers.values())
 
 
 # --------------------------------------
 # ----------Regular expressions---------
 # --------------------------------------
 
-t_ignore = " "
+t_ignore = "\t "
 
 
 # -------------Instructions-------------
@@ -55,8 +53,8 @@ instructions_data = {
     'DIV': ['00', '010', '0'],
     'MUL': ['00', '011', '0'],
     'LST': ['00', '100', '1'],   #Less than
-    'LSL': ['00', '101', '0'],
-    'LSR': ['00', '110', '0'],
+    'SLL': ['00', '101', '0'],
+    'SRL': ['00', '110', '0'],
     'MOD': ['00', '111', '0'],
     'MOV': ['00', '000', '0'],
     'CMP': ['00', '001', '1']

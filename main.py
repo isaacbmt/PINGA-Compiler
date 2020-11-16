@@ -39,7 +39,7 @@ def t_REGISTER(t):
 
 def t_NEWLINE(t):
     r'\n'
-    if t.lexer.lineno <= 0:
+    if t.lexer.lineno < 0:
         t.lexer.lineno -= 1
     else:
         t.lexer.lineno += 1
@@ -47,7 +47,7 @@ def t_NEWLINE(t):
 
 def t_COMMENT(t):
     r'(//.*?\n)'
-    if t.lexer.lineno <= 0:
+    if t.lexer.lineno < 0:
         t.lexer.lineno -= 1
     else:
         t.lexer.lineno += 1
@@ -82,7 +82,7 @@ def t_SEMI(t):
 
 
 def t_error(t):
-    print("Illegal character {0} at line {1}".format(t.value[0], t.lineno))
+    print(f"{Fore.LIGHTRED_EX} Illegal character {t.value[0]} at line {abs(t.lineno)} {Style.RESET_ALL}")
     t.lexer.skip(1)
 
 
@@ -142,7 +142,7 @@ def p_expression_branch(p):
         namelist = names.get(p[2][:-1])
         names[p[2][:-1]] = namelist[1:] + [namelist[0]]
         address = int(endAddress, 2) - int(startAddress[0], 2)
-        address = decToBin(address, 15) if address > 0 else twoComplement(str(address)[1:])
+        address = decToBin(address, 15) if address >= 0 else twoComplement(str(address)[1:])
         p[0] = buildBranchInstr(op, cond, address)
 
 
@@ -221,8 +221,8 @@ def p_arithmetic(p):
                 | DIV
                 | MUL
                 | LST
-                | LSL
-                | LSR
+                | SLL
+                | SRL
                 | MOD
     '''
     p[0] = p[1].upper()
@@ -246,44 +246,26 @@ def p_branch(p):
 
 def p_error(p):
     try:
-        print("Line {1}: Syntax error on '{0}'".format(p.value, lexer.lineno))
+        print(f"{Fore.LIGHTRED_EX} Line {abs(lexer.lineno)}: Syntax error on '{p.value}' {Style.RESET_ALL}")
     except AttributeError:
-        print("Line {0}: Syntax error".format(lexer.lineno))
+        print(f"{Fore.LIGHTRED_EX}Line {abs(lexer.lineno)}: Syntax error {Style.RESET_ALL}")
 
 
-s = readFile('test.asm').rstrip('\n').rstrip(' ')
+s = readFile('newprogram.asm').rstrip('\n').rstrip(' ')
 lexer.input(s)
 while True:
     tok = lexer.token()
     if not tok:
         break
-    # print(tok)
 
-tmp = names
-# tmp = {}
-# for item in names:
-#     tmp[item] = names[item][:len(names[item])/2]
-lexer.lineno = 0
-print('tmp', tmp)
-
-# lexer = lexer.clone()
-# names = tmp
-print('namtmp', names)
+lexer.lineno = -1
 parser = yacc.yacc()
 result = parser.parse(s, lexer=lexer)
 print(result)
-print(labels)
-print('names', names)
+print('labels: ', labels)
+print('names: ', names)
 
 with open('instrucciones.txt', 'w') as f:
     for item in result:
         if item != 'label':
-            if item is not None:
-                f.write("%s\n" % toHex(item))
-
-
-# while True:
-#     try:
-#         s = input('>> ')
-#     except EOFError:
-#         break
+            f.write("%s\n" % toHex(item))
